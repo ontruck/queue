@@ -82,7 +82,7 @@ How to use it?
   start immediately and in parallel.
 
 * Tip: to enable debug logging for the queue job, use
-  ``--log-handler=odoo.addons.queue_job:DEBUG``
+  ``--log-handler=openerp.addons.queue_job:DEBUG``
 
 Caveat
 ------
@@ -127,8 +127,8 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import requests
 
-import odoo
-from odoo.tools import config
+import openerp
+from openerp.tools import config
 
 from .channels import ChannelManager, PENDING, ENQUEUED, NOT_DONE
 
@@ -169,7 +169,7 @@ def _async_http_get(port, db_name, job_uuid):
     # Method to set failed job (due to timeout, etc) as pending,
     # to avoid keeping it as enqueued.
     def set_job_pending():
-        connection_info = odoo.sql_db.connection_info_for(db_name)[1]
+        connection_info = openerp.sql_db.connection_info_for(db_name)[1]
         conn = psycopg2.connect(**connection_info)
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         with closing(conn.cursor()) as cr:
@@ -208,7 +208,7 @@ class Database(object):
 
     def __init__(self, db_name):
         self.db_name = db_name
-        connection_info = odoo.sql_db.connection_info_for(db_name)[1]
+        connection_info = openerp.sql_db.connection_info_for(db_name)[1]
         self.conn = psycopg2.connect(**connection_info)
         self.conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         self.has_queue_job = self._has_queue_job()
@@ -292,10 +292,10 @@ class QueueJobRunner(object):
         self._stop_pipe = os.pipe()
 
     def get_db_names(self):
-        if odoo.tools.config['db_name']:
-            db_names = odoo.tools.config['db_name'].split(',')
+        if openerp.tools.config['db_name']:
+            db_names = openerp.tools.config['db_name'].split(',')
         else:
-            db_names = odoo.service.db.exp_list(True)
+            db_names = openerp.service.db.exp_list(True)
         return db_names
 
     def close_databases(self, remove_jobs=True):

@@ -9,7 +9,7 @@ import uuid
 import sys
 from datetime import datetime, timedelta
 
-import odoo
+import openerp
 
 from .exception import (NoSuchJobError,
                         FailedJobError,
@@ -43,7 +43,7 @@ class DelayableRecordset(object):
         delayable.method(args, kwargs)
 
     ``method`` must be a method of the recordset's Model, decorated with
-    :func:`~odoo.addons.queue_job.job.job`.
+    :func:`~openerp.addons.queue_job.job.job`.
 
     The method call will be processed asynchronously in the job queue, with
     the passed arguments.
@@ -69,8 +69,8 @@ class DelayableRecordset(object):
         recordset_method = getattr(self.recordset, name)
         if not getattr(recordset_method, 'delayable', None):
             raise AttributeError(
-                'method %s on %s is not allowed to be delayed, '
-                'it should be decorated with odoo.addons.queue_job.job.job' %
+                'method %s on %s is not allowed to be delayed, it should '
+                'be decorated with openerp.addons.queue_job.job.job' %
                 (name, self.recordset)
             )
 
@@ -195,7 +195,7 @@ class Job(object):
             raise NoSuchJobError(
                 'Job %s does no longer exist in the storage.' % job_uuid)
 
-        args = stored.args
+        args = tuple(stored.args)
         kwargs = stored.kwargs
         method_name = stored.method_name
 
@@ -203,7 +203,7 @@ class Job(object):
         recordset = model.browse(stored.record_ids)
         method = getattr(recordset, method_name)
 
-        dt_from_string = odoo.fields.Datetime.from_string
+        dt_from_string = openerp.fields.Datetime.from_string
         eta = None
         if stored.eta:
             eta = dt_from_string(stored.eta)
@@ -291,7 +291,7 @@ class Job(object):
             is computed from the function doc or name
         :param channel: The complete channel name to use to process the job.
         :param env: Odoo Environment
-        :type env: :class:`odoo.api.Environment`
+        :type env: :class:`openerp.api.Environment`
         """
         if args is None:
             args = ()
@@ -304,7 +304,7 @@ class Job(object):
         assert isinstance(kwargs, dict), "%s: kwargs are not a dict" % kwargs
 
         if (not inspect.ismethod(func) or
-                not isinstance(func.im_class, odoo.models.MetaModel)):
+                not isinstance(func.im_class, openerp.models.MetaModel)):
             raise TypeError("Job accepts only methods of Models")
 
         recordset = func.im_self
@@ -401,7 +401,7 @@ class Job(object):
                 'eta': False,
                 }
 
-        dt_to_string = odoo.fields.Datetime.to_string
+        dt_to_string = openerp.fields.Datetime.to_string
         if self.date_enqueued:
             vals['date_enqueued'] = dt_to_string(self.date_enqueued)
         if self.date_started:
@@ -546,7 +546,7 @@ class Job(object):
 
 def _is_model_method(func):
     return (inspect.ismethod(func) and
-            isinstance(func.im_class, odoo.models.MetaModel))
+            isinstance(func.im_class, openerp.models.MetaModel))
 
 
 def job(func=None, default_channel='root', retry_pattern=None):

@@ -7,13 +7,18 @@ from datetime import datetime, date
 
 import dateutil
 
-from odoo import fields, models
+from openerp import fields, models
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class JobSerialized(fields.Field):
     """ Serialized fields provide the storage for sparse fields. """
-    type = 'job_serialized'
-    column_type = ('text', 'text')
+    # type = 'job_serialized'
+    type = 'serialized'
+    # column_type = ('text', 'text')
 
     def convert_to_column(self, value, record):
         return json.dumps(value, cls=JobEncoder)

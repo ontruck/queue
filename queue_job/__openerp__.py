@@ -16,6 +16,7 @@
  'data': ['security/security.xml',
           'security/ir.model.access.csv',
           'views/queue_job_views.xml',
+          'views/job_group_views.xml',
           'data/queue_data.xml',
           ],
  'installable': True,

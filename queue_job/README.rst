@@ -16,8 +16,8 @@ Example:
 
 .. code-block:: python
 
-  from odoo import models, fields, api
-  from odoo.addons.queue_job.job import job
+  from openerp import models, fields, api
+  from openerp.addons.queue_job.job import job
 
   class MyModel(models.Model):
      _name = 'my.model'

@@ -22,6 +22,14 @@
             <field eval="'()'" name="args"/>
         </record>
 
+        <record id="queue_job_group_seq" model="ir.sequence">
+            <field name="name">Queue job group</field>
+            <field name="code">queue.job.group</field>
+            <field name="company_id" eval="False"/>
+            <field name="prefix">JG</field>
+            <field name="padding">6</field>
+        </record>
+
     </data>
 
     <data noupdate="0">
