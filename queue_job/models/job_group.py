@@ -3,34 +3,29 @@
 
 from openerp import api, fields, models
 
+import logging
+_logger = logging.getLogger(__name__)
+
 
 class JobGroup(models.Model):
     _name = 'queue.job.group'
+    _order = 'id desc'
 
     name = fields.Char(readonly=True)
+    group_type = fields.Char()
     jobs = fields.One2many('queue.job', inverse_name='group')
-    jobs_count = fields.Integer(
-        compute='get_jobs_status_count',
-        multi='jobs_count')
-    jobs_in_progress_count = fields.Integer(
-        compute='get_jobs_status_count',
-        multi='jobs_count')
-    jobs_done_count = fields.Integer(
-        compute='get_jobs_status_count',
-        multi='jobs_count')
-    jobs_failed_count = fields.Integer(
-        compute='get_jobs_status_count',
-        multi='jobs_count')
+    jobs_count = fields.Integer(readonly=True)
+    jobs_in_progress_count = fields.Integer(readonly=True)
+    jobs_done_count = fields.Integer(readonly=True)
+    jobs_failed_count = fields.Integer(readonly=True)
     state = fields.Selection([
         ('in_progress', 'In progress'),
         ('done_with_fails', 'Done with fails'),
         ('failed', 'Failed'),
-        ('done', 'Done')],
-        compute='get_jobs_status_count',
-        multi='jobs_count')
-    progress = fields.Float(
-        compute='get_jobs_status_count',
-        multi='jobs_count')
+        ('done', 'Done')], readonly=True)
+    progress = fields.Float(readonly=True)
+    date_started = fields.Datetime(string='Start Date', readonly=True)
+    date_done = fields.Datetime(string='Date Done', readonly=True)
 
     @api.model
     def create(self, vals):
@@ -38,7 +33,7 @@ class JobGroup(models.Model):
         return super(JobGroup, self).create(vals)
 
     @api.multi
-    def get_jobs_status_count(self):
+    def check_state(self):
         for group in self:
             in_progress = 0
             done = 0
@@ -60,13 +55,18 @@ class JobGroup(models.Model):
             else:
                 state = 'failed'
 
-            group.jobs_count = len(group.jobs)
-            group.jobs_in_progress_count = in_progress
-            group.jobs_done_count = done
-            group.jobs_failed_count = failed
-            group.state = state
             progress = 1.0 * done / (len(group.jobs) or 1) * 100
-            group.progress = progress
+            data = {
+                'jobs_count': len(group.jobs),
+                'jobs_in_progress_count': in_progress,
+                'jobs_done_count': done,
+                'jobs_failed_count': failed,
+                'state': state,
+                'progress': progress,
+            }
+            if progress == 100:
+                data['date_done'] = group.jobs[0].date_done
+            group.write(data)
 
     @api.multi
     def retry_jobs(self):

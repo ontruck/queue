@@ -159,7 +159,11 @@ class QueueJob(models.Model):
     @api.multi
     def write(self, vals):
         res = super(QueueJob, self).write(vals)
-        if vals.get('state') == 'failed':
+        state = vals.get('state')
+        if state:
+            for job in self:
+                job.group.check_state()
+        if state == 'failed':
             # subscribe the users now to avoid to subscribe them
             # at every job creation
             domain = self._subscribe_users_domain()

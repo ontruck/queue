@@ -4,6 +4,8 @@
 
 import inspect
 
+from datetime import datetime
+
 from openerp import api, models, SUPERUSER_ID, _
 from ..job import DelayableRecordset
 
@@ -67,9 +69,15 @@ def with_delay(self, priority=None, eta=None,
 
 @api.multi
 def delay_group(self, func, priority=None, eta=None, max_retries=None,
-                description=None, channel=None, **kwargs):
-    group = self.env['queue.job.group'].create({})
-    for obj in self:
+                description=None, channel=None, group_type=False,
+                aggrupation_iterator=None, **kwargs):
+    if not group_type:
+        group_type = "{}.{}".format(self.__class__.__name__, func)
+    group = self.env['queue.job.group'].create({
+        'group_type': group_type,
+        'date_started': datetime.now()
+    })
+    for obj in aggrupation_iterator or self:
         delayable = obj.with_delay(priority=priority,
                                    eta=eta,
                                    max_retries=max_retries,

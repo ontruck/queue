@@ -52,6 +52,11 @@
                                 <field name="progress" widget="progressbar" nolabel="1"/>
                             </h1>
                         </div>
+                        <group>
+                            <field name="group_type"/>
+                            <field name="date_started"/>
+                            <field name="date_done"/>
+                        </group>
                     </sheet>
                 </form>
             </field>
@@ -63,11 +68,14 @@
             <field name="arch" type="xml">
                 <tree string="Job Group" create="false" delete="false" colors="grey:state=='done';blue:state=='in_progress';red:state in ['failed', 'done_with_fails']">
                     <field name="name"/>
+                    <field name="group_type"/>
                     <field name="state"/>
                     <field name="jobs_in_progress_count"/>
                     <field name="jobs_done_count"/>
                     <field name="jobs_failed_count"/>
                     <field name="progress" widget="progressbar"/>
+                    <field name="date_started"/>
+                    <field name="date_done"/>
                 </tree>
             </field>
         </record>
@@ -78,7 +86,13 @@
             <field name="arch" type="xml">
                 <search string="Job Group">
                     <field name="name"/>
+                    <field name="group_type"/>
                     <field name="state"/>
+                    <field name="date_started"/>
+                    <field name="date_done"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Group type" context="{'group_by': 'group_type'}" />
+                    </group>
                 </search>
             </field>
         </record>
